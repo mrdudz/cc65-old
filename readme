@@ -2,41 +2,113 @@ these are old source snapshots, which might be useful to track down bugs
 
 --------------------------------------------------------------------------------
 
+CAUTION: it is recommended to uninstall both the compiler and libraries prior
+         building the tarball to avoid side effects caused by eg including
+         header files from another compiler/library version (this is especially
+         true for very old versions)
+
+--------------------------------------------------------------------------------
+
 2.7.0: (14-10-2001)
 
-$ make -C src -f make/gcc.mak && make -C libsrc c64lib
+$ make -C src -f make/gcc.mak && make -C libsrc
 
-note: apple2 lib does not build
+note: fails with unexpected errors when building libs
 
 --------------------------------------------------------------------------------
 
 2.8.0: (12-04-2002)
 
-$ make -C src -f make/gcc.mak && make -C libsrc c64lib
+$ make -C src -f make/gcc.mak && make -C libsrc
 
-note: apple2 lib does not build
+note: fails with unexpected errors when building libs
 
 --------------------------------------------------------------------------------
 
 2.10.1: (06-05-2004)
 
-$ make -C src -f make/gcc.mak && make -C libsrc c64lib
+$ make -f make/gcc.mak
+
+(this is funky, as none of the libs compiles with the compiler in this tarball)
+
+fix: locate the files and make the arrays use fixed length:
 
 errormsg.c(12): Error: Size of `_sys_errlist' is invalid
+     const char* const _sys_errlist[16] = {
+
+locale.c(21): Error: Size of `EmptyString' is invalid
+    static char EmptyString [1] = "";
+
+...etc (there will be more)
 
 --------------------------------------------------------------------------------
 
 2.11.0: (10-09-2005)
 
-$ make -C src -f make/gcc.mak && make -C libsrc
+$ make -f make/gcc.mak
+
+note: it all works as expected, except the docs are not built
+fix: in doc/Makefile lines 59 and 84 are spaces before the required TAB, remove
+     them
 
 --------------------------------------------------------------------------------
 
 2.12.0: (21-04-2008)
 
-$ make -C src -f make/gcc.mak && make -C libsrc
+$ make -f make/gcc.mak
 
 testsuite fails on: add3a, add3, array, casttochar, cc65090124, cc65090913,
-                    cc65091007, cc65091020, cc65101102, cc65101209, cc65101216,
-                    cc65110210, cq4, cq715, cq85, fields, macro, sitest,
+                    cc65091007, cc65091020, cq4, cq715, cq85, macro,
                     strtol-test, strtoul-test, switch, wf1, yacc, yaccdbg
+testsuite expected fails: fields, sitest
+testsuite must (and do) fail: front
+testsuite works although it should fail: cc65091001
+
+--------------------------------------------------------------------------------
+
+2.13.2: (07-03-2010)
+
+$ make -f make/gcc.mak
+
+testsuite fails on: add3a, add3, casttochar, cc65101209, cc65101216
+testsuite expected fails: fields, sitest
+testsuite must (and do) fail: cc65091001, front
+
+--------------------------------------------------------------------------------
+
+2.13.3: (08-02-2012)
+
+$ make -f make/gcc.mak
+
+testsuite fails on: add3a, add3, casttochar
+testsuite expected fails: fields, sitest
+testsuite must (and do) fail: cc65091001, front
+
+--------------------------------------------------------------------------------
+
+CAUTION: when switching revisions using git, make sure to use "make clean"
+         (or "make -f make/gcc.mak zap" on older versions) BEFORE using
+         something like
+         git checkout `git rev-list -n 1 --before="2013-01-01 13:37" master`
+
+--------------------------------------------------------------------------------
+
+current git version:
+
+$ make
+
+testsuite fails on: add3a, add3
+testsuite expected fails: fields, sitest
+testsuite must (and do) fail: cc65091001, front
+
+--------------------------------------------------------------------------------
+
+general notes regarding failed tests:
+
+yacc, yaccdbg, charset fail on charset conversion issues when using c64 target/
+x64 as simulator.
+
+fields relies on weird bordercases regarding bitfields. not sure if it even
+qualifies as failed.
+
+sitest tests features yet unimplemented in cc65 so it can not work
